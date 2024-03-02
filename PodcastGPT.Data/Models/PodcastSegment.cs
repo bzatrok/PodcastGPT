@@ -8,9 +8,9 @@ public class PodcastSegment
 	public string? AudioFileUrl { get; set; }
 	public string OpenAiRole { get; set; }
 
-	public Podcast Podcast { get; set; }
+	public virtual Podcast Podcast { get; set; }
 	public Guid PodcastId { get; set; }
 	
-	public PodcastPersona PodcastPersona { get; set; }
+	public virtual PodcastPersona PodcastPersona { get; set; } 
 	public Guid PodcastPersonaId { get; set; }
 }

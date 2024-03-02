@@ -6,6 +6,6 @@ public class NewsSite
 	public string Name { get; set; }
 	public string Url { get; set; }
 	public string RssFeedUrl { get; set; }
-	public List<NewsSiteAuthor> NewsArticleAuthors { get; set; }
-	public List<NewsSiteArticle> NewsSiteArticles { get; set; }
+	public virtual ICollection<NewsSiteAuthor> NewsArticleAuthors { get; set; } = new List<NewsSiteAuthor>();
+	public virtual ICollection<NewsSiteArticle> NewsSiteArticles { get; set; } = new List<NewsSiteArticle>();
 }

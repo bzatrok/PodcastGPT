@@ -1,5 +1,5 @@
 export interface PodcastCreationRequest {
-    PodcastTitle?: string;
+    // PodcastTitle?: string;
     PodcastTopic?: string;
     PodcastNewsArticleUrl?: string;
 }

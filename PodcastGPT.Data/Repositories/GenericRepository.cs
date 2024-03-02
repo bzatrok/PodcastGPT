@@ -24,54 +24,38 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 		return await _dbSet.FindAsync(id);
 	}
 
-	public async Task InsertOrUpdateAsync(object id, T entity)
+	public async Task AddAsync(T entity)
 	{
 		try
 		{
-			var result = await GetByIdAsync(id);
-			if (result != null)
-			{
-				try
-				{
-					// you can't attach book since it doesn't exist in the database yet
-					// attach result instead
-					_context.Attach(result);
-					result = entity; // this will update all the fields at once
-					_context.SaveChanges();
-				}
-				catch (Exception ex)
-				{
-					throw;
-				}
-			}
-			else
-			{
-				await _dbSet.AddAsync(entity);
-			}
-
-			// await _dbSet.AddAsync(entity);
-			_context.SaveChanges();
+			await _dbSet.AddAsync(entity);
+			await SaveChangesAsync();
 		}
 		catch (Exception ex)
 		{
-			throw;
+			Console.WriteLine(ex);
 		}
 	}
 
-	// public void Update(T entity)
-	// {
-	// 	_dbSet.Attach(entity);
-	// 	_context.Entry(entity).State = EntityState.Modified;
-	// 	_context.SaveChanges();
-	// }
+	public async Task SaveChangesAsync()
+	{
+		try
+		{
+			await _context.SaveChangesAsync();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+		}
+	}
 
-	public void Delete(object id)
+	public async Task DeleteAsync(object id)
 	{
 		T entityToDelete = _dbSet.Find(id);
 		if (entityToDelete != null)
 		{
 			_dbSet.Remove(entityToDelete);
-			_context.SaveChanges();
+			await SaveChangesAsync();
 		}
 	}
 }

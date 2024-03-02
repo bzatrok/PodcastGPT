@@ -42,13 +42,13 @@ const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setS
                             </h3>
                         </div>
                         <div className="p-4 md:p-5 space-y-4">
-                            <LabeledInputField
+                            {/* <LabeledInputField
                                 label="Podcast Title"
                                 placeHolder="The future of space exploration"
                                 onChange={(e) => setPodcastCreationRequest({
                                     ...podcastCreationRequest, 
                                     PodcastTitle: e
-                                })} />
+                                })} /> */}
                             <LabeledInputField
                                 label="Podcast Topic"
                                 placeHolder="Discovery of life on Mars..."

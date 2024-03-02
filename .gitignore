@@ -60,8 +60,8 @@ Simplifier/wwwroot/css/output.css
 
 docker_push.sh
 
-.next
-.next/
+**/.next
+**/.next/
 
 database
 database/

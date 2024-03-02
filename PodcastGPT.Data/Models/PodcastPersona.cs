@@ -9,6 +9,6 @@ public class PodcastPersona
 	
 	//public List<PodcastSegment> PodcastSegments { get; set; }
 	
-	public List<Podcast> Podcasts { get; set; }
+	public virtual ICollection<Podcast> Podcasts { get; set; } = new List<Podcast>();
 	// public Guid PodcastId { get; set; }
 }

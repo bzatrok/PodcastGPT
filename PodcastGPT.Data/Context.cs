@@ -38,6 +38,9 @@ public class DatabaseContext : DbContext
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
 		var dbType = Environment.GetEnvironmentVariable("DB_TYPE") ?? "sqlite";
+		
+		// https://learn.microsoft.com/en-us/ef/core/querying/related-data/lazy
+		optionsBuilder.UseLazyLoadingProxies();
 
 		switch (dbType.ToLower())
 		{

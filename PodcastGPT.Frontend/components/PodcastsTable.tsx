@@ -12,8 +12,8 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
     return (
         <div className="flex flex-col gap-2 grow m-10 p-4 rounded border border-gray-200 box-shadow-xl bg-white h-96 overflow-y-auto bg-white">
             <div className="flex flex-row gap-2 text-lg font-medium">
-                <div className="flex-1">podcastId</div>
                 <div className="flex-1">title</div>
+                <div className="flex-1">topic</div>
                 <div className="flex-1">slug</div>
                 <div className="flex-1">date</div>
                 <div className="flex-1">status</div>
@@ -22,9 +22,11 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                 <div className="flex-1">delete</div>
             </div>
             {podcasts.map((podcast) => (
-                <div className="flex flex-row gap-2 p-2 border-b border-gray-200">
-                    <div className="flex-1">{podcast.podcastId}</div>
+                <div 
+                key={`${podcast.podcastId}_${podcast.status}`}
+                className="flex flex-row gap-2 p-2 border-b border-gray-200">
                     <div className="flex-1">{podcast.title}</div>
+                    <div className="flex-1">{podcast.topic}</div>
                     <div className="flex-1">{podcast.slug}</div>
                     <div className="flex-1">{podcast.date.toString()}</div>
                     <div className="flex-1">{podcast.status}

@@ -4,5 +4,5 @@ public class OpenAiConversation
 {
 	public Guid OpenAiConversationId { get; set; }
 	
-	public List<OpenAiMessage> OpenAiMessages { get; set; }
+	public virtual ICollection<OpenAiMessage> OpenAiMessages { get; set; }	= new List<OpenAiMessage>();
 }

@@ -16,10 +16,8 @@ public class OpenAIService
 
 	private readonly ILogger<OpenAIService> _logger;
 	private readonly IGenericRepository<Podcast> _podcastRepository;
-	private readonly IGenericRepository<OpenAiConversation> _openAiConversationRepository;
-	private readonly IGenericRepository<OpenAiMessage> _openAiMessageRepository;
+	private readonly IGenericRepository<PodcastSegment> _podcastSegmentRepository;
 	private readonly IGenericRepository<PodcastPersona> _podcastPersonaRepository;
-	private readonly IGenericRepository<NewsSiteArticle> _articleRepository;
 	private readonly AudioService _audioService;
 	private readonly OpenAiClient _openAiClient;
 
@@ -29,20 +27,16 @@ public class OpenAIService
 	public OpenAIService(
 		ILogger<OpenAIService> logger,
 		IGenericRepository<Podcast> podcastRepository,
-		IGenericRepository<OpenAiConversation> openAiConversationRepository,
-		IGenericRepository<OpenAiMessage> openAiMessageRepository,
+		IGenericRepository<PodcastSegment> podcastSegmentRepository,
 		IGenericRepository<PodcastPersona> podcastPersonaRepository,
-		IGenericRepository<NewsSiteArticle> articleRepository,
 		AudioService audioService,
 		OpenAiClient openAiClient
 	)
 	{
 		_logger = logger;
 		_podcastRepository = podcastRepository;
-		_openAiConversationRepository = openAiConversationRepository;
-		_openAiMessageRepository = openAiMessageRepository;
+		_podcastSegmentRepository = podcastSegmentRepository;
 		_podcastPersonaRepository = podcastPersonaRepository;
-		_articleRepository = articleRepository;
 		_audioService = audioService;
 		_openAiClient = openAiClient;
 	}
@@ -51,12 +45,13 @@ public class OpenAIService
 	#region Requests
 	
 	public async Task<Podcast> GeneratePodcastContentFromNews(
-		Podcast podcast,
-		string? podcastTitle,
-		string? podcastTopic,
+		Guid podcastId,
+		// string? podcastTitle,
+		// string? podcastTopic,
 		List<NewsSiteArticle> articleList
 		)
 	{
+		var podcast = await _podcastRepository.GetByIdAsync(podcastId);
 		var showName = "NewsFlash";
 
 		var podcastArticles = string.Join(';', articleList.Select(article => $"Title: {article.Title}. Summary: {article.Summary}"));
@@ -70,7 +65,6 @@ public class OpenAIService
 		PodcastPersona? hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
 		PodcastPersona? guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
 	
-			
 		// SETTING UP PODCAST LOGIC
 		
 		// var existingPodcast = await _podcastRepository.GetByIdAsync(podcast.PodcastId);
@@ -79,83 +73,94 @@ public class OpenAIService
 		// if (existingPodcast != null)
 		// 	_podcastRepository.Delete(existingPodcast.PodcastId);
 		
-		await _podcastRepository.InsertOrUpdateAsync(podcast.PodcastId, podcast);
+		// podcast.PodcastPersonas.Add(hostPersona);
+		// podcast.PodcastPersonas.Add(guestPersona);
 
-		podcast.PodcastSegments.Add(new PodcastSegment
+		var firstSegment = new PodcastSegment
 		{
 			Order = 1,
 			OpenAiRole = "user",
-			TextContent = $"Good morning folks! Welcome to the latest episode of our podcast, {showName}. I'm your host, {hostPersona.Name}. Today's topic is {podcastTopic}. We have a special guest with us, {guestPersona.Name}. Welcome to the show!",
+			TextContent =
+				$"Good morning folks! Welcome to the latest episode of our podcast, {showName}. I'm your host, {hostPersona.Name}. Today's topic is {podcast.Topic}. We have a special guest with us, {guestPersona.Name}. Welcome to the show!",
 			PodcastId = podcast.PodcastId,
-			PodcastPersonaId = hostPersona.PodcastPersonaId
-		});
+			PodcastPersonaId = hostPersona.PodcastPersonaId,
+			PodcastSegmentId = Guid.NewGuid()
+		};
+		
+		await _podcastSegmentRepository.AddAsync(firstSegment);
 
-		var lastSegment = podcast.PodcastSegments.Last();
-
-		while (!lastSegment.TextContent.Contains("__OVER__"))
+		var previousSegment = firstSegment;
+		
+		var segments = new List<PodcastSegment>
 		{
-			lastSegment = podcast.PodcastSegments.Last();
-			
-			var nextPersona = lastSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
+			firstSegment
+		};
+
+		while (!previousSegment.TextContent.Contains("__OVER__"))
+		{
+			var nextPersona = previousSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
 				? guestPersona
 				: hostPersona;
 			
-			var nextRole = lastSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
+			var nextRole = previousSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
 				? "assistant"
 				: "user";
 			
-			var systemMessage = lastSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
+			var systemMessage = previousSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
 				? guestSystemMessage
 				: interviewerSystemMessage;
 			
-			var nextSegment = await GenerateAssistantResponseForPodcastSegments(systemMessage, podcast.PodcastSegments);
+			var nextSegment = await GenerateAssistantResponseForPodcastSegments(systemMessage, segments);
 
 			if (nextSegment == null)
 				throw new Exception("OpenAI response is null");
 			
-			podcast.PodcastSegments.Add(new PodcastSegment
+			// await _podcastRepository.SaveChangesAsync();
+
+			var newSegment = new PodcastSegment
 			{
-				Order = lastSegment.Order + 1,
+				Order = previousSegment.Order + 1,
 				OpenAiRole = nextRole,
 				TextContent = nextSegment,
 				PodcastId = podcast.PodcastId,
-				PodcastPersonaId = nextPersona.PodcastPersonaId
-			});
-		}
+				PodcastPersonaId = nextPersona.PodcastPersonaId,
+				PodcastSegmentId = Guid.NewGuid()
+			};
+			
+			await _podcastSegmentRepository.AddAsync(newSegment);
 
+			segments.Add(newSegment);
+			
+			previousSegment = newSegment;
+		}
+		
 		podcast.Status = "textready";
 
-		await _podcastRepository.InsertOrUpdateAsync(podcast.PodcastId, podcast);
+		await _podcastRepository.SaveChangesAsync();
 
-		foreach (var segment in podcast.PodcastSegments)
+		foreach (var segment in segments)
 		{
 			var persona = personas.FirstOrDefault(persona => persona.PodcastPersonaId == segment.PodcastPersonaId);
-			
 			var generatedAudioForSegment = await ConvertSegmentToSpeech(segment, persona.VoiceId);
 			segment.AudioFileUrl = generatedAudioForSegment.AudioUrl;
+			await _podcastSegmentRepository.SaveChangesAsync();
 		}
 		
 		podcast.Status = "audiosegmentsready";
-		await _podcastRepository.InsertOrUpdateAsync(podcast.PodcastId, podcast);
+		
+		await _podcastRepository.SaveChangesAsync();
 
-		 var mergedFilePath = await _audioService.MergeAudioFilesForPodcast(podcast);
+		var mergedFilePath = await _audioService.MergeAudioFilesForPodcast(podcast);
 		
 		podcast.FullAudioFileUrl = mergedFilePath;
 
 		podcast.Status = "ready";
-		await _podcastRepository.InsertOrUpdateAsync(podcast.PodcastId, podcast);
-		
-		// UPDATE ARTICLES TO MARK AS USED
-		foreach (var article in articleList)
-		{
-			article.PodcastId = podcast.PodcastId;
-			await _articleRepository.InsertOrUpdateAsync(article.NewsSiteArticleId, article);
-		}
+		await _podcastRepository.SaveChangesAsync();
 		
 		return podcast;
 	}
     
-    public async Task<string> GenerateAssistantResponseForPodcastSegments(string systemPrompt, List<PodcastSegment> messages)
+    public async Task<string> GenerateAssistantResponseForPodcastSegments(string systemPrompt, IEnumerable<PodcastSegment> messages)
     {
 	    try
 	    {

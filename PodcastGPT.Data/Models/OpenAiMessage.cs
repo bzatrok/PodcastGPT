@@ -8,6 +8,6 @@ public class OpenAiMessage
 	public DateTime Time { get; set; }
 	public string messageType { get; set; }
 	
-	public OpenAiConversation OpenAiConversation { get; set; }
+	public virtual OpenAiConversation OpenAiConversation { get; set; }
 	public Guid OpenAiConversationId { get; set; }
 }

@@ -10,6 +10,6 @@ public class NewsSiteArticle
 	// public NewsSite NewsSite { get; set; }
 	// public Guid NewsSiteId { get; set; }
 	
-	public Podcast Podcast { get; set; }
+	public virtual Podcast Podcast { get; set; }
 	public Guid? PodcastId { get; set; }
 }

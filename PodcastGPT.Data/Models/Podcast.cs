@@ -10,7 +10,7 @@ public class Podcast
 	public string Topic { get; set; }
 	public DateTime Date { get; set; }
 	public string? FullAudioFileUrl { get; set; }
-	public List<PodcastSegment> PodcastSegments { get; set; }
-	public List<PodcastPersona> PodcastPersonas { get; set; }
-	public List<NewsSiteArticle> NewsSiteArticles { get; set; }
+	public virtual ICollection<PodcastSegment> PodcastSegments { get; set; } = new List<PodcastSegment>();
+	public virtual ICollection<PodcastPersona> PodcastPersonas { get; set; } = new List<PodcastPersona>();
+	public virtual ICollection<NewsSiteArticle> NewsSiteArticles { get; set; } = new List<NewsSiteArticle>();
 }

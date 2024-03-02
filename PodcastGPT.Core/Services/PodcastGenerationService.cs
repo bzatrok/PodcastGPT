@@ -81,53 +81,29 @@ public class PodcastGenerationService
 			// else
 			// {
 			
+			// --
+			
 			if (!string.IsNullOrWhiteSpace(podcastGenerationRequest.PodcastNewsArticleUrl))
 				newsArticlesForPodcast = await _articleService.GetArticlesFromUrls(new List<string> {podcastGenerationRequest.PodcastNewsArticleUrl});
 			
 			foreach (var newArticle in newsArticlesForPodcast)
 			{
-				await _newsSiteArticleRepository.InsertOrUpdateAsync(newArticle.NewsSiteArticleId, newArticle);
-				//
-				// var existingArticle = await _newsSiteArticleRepository.GetByIdAsync(newArticle.NewsSiteArticleId);
-				//
-				// if (existingArticle == null)
-				// 	await _newsSiteArticleRepository.InsertAsync(newArticle);
-				// else
-				// 	_newsSiteArticleRepository.Update(newArticle);
+				var existingArticle = await _newsSiteArticleRepository.GetByIdAsync(newArticle.NewsSiteArticleId);
+				if (existingArticle == null)
+					await _newsSiteArticleRepository.AddAsync(newArticle);
 			}
-
+			
 			newsArticlesForPodcast = newsArticlesForPodcast
 				.Where(article => article.PodcastId == null)
 				.Take(3)
 				.ToList();
 			
-			// if (podcastGenerationRequest.PodcastHostPersonaId != null)
-			// 	hostPersona 
+			var kickoffMessage = "Today's news stories are: " + string.Join("; ", newsArticlesForPodcast.Select(article => article.Title));
+			var summaryGenSystemPrompt =
+				"You are an expert summarizer of news! Please come up with a catchy, slightly clickbait-y title for a podcast based on these news stories! Keep it short, one sentence! Make sure it not too generic! Feature one of the stories in the list provided! " +
+				kickoffMessage;
+			var podcastTitle = await _openAiClient.GenerateSingleAssistantResponse(summaryGenSystemPrompt, kickoffMessage);
 			
-			// if (podcastGenerationRequest.PodcastGuestPersonaId != null)
-			// 	guestPersona = personas.FirstOrDefault(persona => persona.PodcastPersonaId == podcastGenerationRequest.PodcastGuestPersonaId.GetValueOrDefault());
-			
-			// if (hostPersona == null)
-			// 	hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
-			//
-			// if (guestPersona == null)
-			// 	guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
-
-			// SUMMARY GENERATION
-			var podcastTitle = podcastGenerationRequest.PodcastTitle;
-
-			if (string.IsNullOrWhiteSpace(podcastTitle))
-			{
-				var kickoffMessage = "Today's news stories are: " + string.Join("; ", newsArticlesForPodcast.Select(article => article.Title));
-				var summaryGenSystemPrompt =
-					"You are an expert summarizer of news! Please come up with a catchy, slightly clickbait-y title for a podcast based on these news stories! Keep it short, one sentence! Make sure it not too generic! Feature one of the stories in the list provided! " +
-					kickoffMessage;
-				podcastTitle = await _openAiClient.GenerateSingleAssistantResponse(summaryGenSystemPrompt, kickoffMessage);
-			}
-			
-			// RUN in background 
-			
-				
 			var newPodcast = new Podcast()
 			{
 				Title = podcastTitle.Trim(),
@@ -136,20 +112,31 @@ public class PodcastGenerationService
 			};
 		
 			var podcastHash = HashHelper.GenerateHash(newPodcast);
+			var newPodcastId = new Guid(podcastHash.Substring(0, 32));
 
-			newPodcast.PodcastId = new Guid(podcastHash.Substring(0, 32));
+			newPodcast.PodcastId = newPodcastId;
 			newPodcast.PodcastSegments = new List<PodcastSegment>();
+			newPodcast.PodcastPersonas = new List<PodcastPersona>();
+			newPodcast.NewsSiteArticles = new List<NewsSiteArticle>();
 			newPodcast.Date = DateTime.Now;
 			newPodcast.Status = "generating";
 			
-			await _podcastRepository.InsertOrUpdateAsync(newPodcast.PodcastId, newPodcast);
+			await _podcastRepository.AddAsync(newPodcast);
+
+			// UPDATE ARTICLES TO MARK AS USED
+			foreach (var article in newsArticlesForPodcast)
+			{
+				article.PodcastId = newPodcast.PodcastId;
+			}
 			
+			await _newsSiteArticleRepository.SaveChangesAsync();
+
 			Task.Run(async () =>
 			{
 				await _openAiService.GeneratePodcastContentFromNews(
-					newPodcast,
-					podcastTitle,
-					podcastGenerationRequest.PodcastTopic,
+					newPodcastId,
+					// podcastTitle,
+					// podcastGenerationRequest.PodcastTopic,
 					newsArticlesForPodcast
 				);
 			});

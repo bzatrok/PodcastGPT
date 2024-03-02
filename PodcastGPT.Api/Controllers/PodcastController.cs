@@ -72,13 +72,25 @@ public class PodcastController : ControllerBase
 	
 	[HttpDelete]
 	[Route("podcasts/{podcastId}")]
-	public ActionResult DeletePodcastById([FromRoute] Guid podcastId)
+	public async Task<ActionResult> DeletePodcastById([FromRoute] Guid podcastId)
 	{
 		try
 		{
 			if (podcastId != Guid.Empty)
 			{
-				_podcastRepository.Delete(podcastId);
+				var podcast = await _podcastRepository.GetByIdAsync(podcastId);
+
+				foreach (var segment in podcast.PodcastSegments)
+				{
+					var segmentFile = new FileInfo(segment.AudioFileUrl);
+					segmentFile.Delete();
+				}
+
+				var fullFile = new FileInfo(podcast.FullAudioFileUrl);
+				fullFile.Delete();
+				
+				await _podcastRepository.DeleteAsync(podcastId);
+
 				return Ok("Podcast deleted successfully");
 			} else {
 				return BadRequest("A valid PodcastId in Guid format is required");
