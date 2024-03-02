@@ -79,6 +79,16 @@ public class DatabaseContext : DbContext
 		// 		RssFeedUrl = "https://feeds.arstechnica.com/arstechnica/index"
 		// 	}
 		// );
+
+		modelBuilder.Entity<PodcastPersona>()
+			.HasMany(p => p.GuestOnPodcasts)
+			.WithOne(p => p.PodcastGuestPersona)
+			.HasForeignKey(p => p.PodcastGuestPersonaId);
+
+		modelBuilder.Entity<PodcastPersona>()
+			.HasMany(p => p.HostOnPodcasts)
+			.WithOne(p => p.PodcastHostPersona)
+			.HasForeignKey(p => p.PodcastHostPersonaId);
 		
 		modelBuilder.Entity<PodcastPersona>()
 			.HasData(
@@ -98,8 +108,7 @@ public class DatabaseContext : DbContext
 				}
 			);
 		
-		modelBuilder.Entity<Podcast>()
-			.HasMany(e => e.PodcastPersonas)
-			.WithMany(e => e.Podcasts);
+		// Unable to determine the relationship represented by navigation 'Podcast.PodcastGuestPersona' of type 'PodcastPersona'.
+		// Either manually configure the relationship, or ignore this property using the '[NotMapped]' attribute or by using 'EntityTypeBuilder.Ignore' in 'OnModelCreating'.
 	}
 }

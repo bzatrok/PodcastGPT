@@ -34,12 +34,25 @@ public class AudioService
 	
 	public async Task<string> MergeAudioFilesForPodcast(Podcast podcast)
 	{
-		var outputPath = $"generated/podcasts/{podcast.PodcastId}.mp3";	
+		var outputPath = $"generated/podcasts/{podcast.Slug}.mp3";	
 		var audioFilePaths = podcast.PodcastSegments.Select(segment => segment.AudioFileUrl).ToList();
 		
 		var mergedFilePath = await _audioFileHelper.MergeAudioFiles(
 			outputPath,
 			audioFilePaths);
+		
+		foreach (var audioFilePath in audioFilePaths)
+		{
+			try
+			{
+				var file = new FileInfo(audioFilePath);
+				file.Delete();
+			}
+			catch (Exception e)
+			{
+				_logger.LogError(e, "Error deleting audio file");
+			}
+		}
 
 		return mergedFilePath;
 	}

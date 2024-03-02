@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
 
 import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import { Podcast } from '@/models/dtos/Podcast'
 import PodcastsTable from '@/components/PodcastsTable'
 import CreatePodcastModal from '@/components/CreatePodcastModal'
 import DeletePodcastModal from '@/components/DeletePodcastModal'
-import { PodcastDetailResponse } from '@/models/responses/PodcastDetailResponse'
-
+ 
 const Home: React.FC = () => {
 
   const [showModalType, setShowModalType] = useState<string | null>(null);
@@ -54,7 +52,6 @@ const Home: React.FC = () => {
       <PodcastsTable 
       podcasts={podcasts} 
       showDeleteModal={showDeleteModal}/>
-      <Footer />
       <CreatePodcastModal
         showModal={showModalType === "create"}
         setShowModal={setShowModal} 

@@ -14,6 +14,7 @@ public class PodcastGenerationService
 	// private readonly IGenericRepository<NewsSite> _newsSiteRepository;
 	private readonly IGenericRepository<NewsSiteArticle> _newsSiteArticleRepository;
 	private readonly IGenericRepository<Podcast> _podcastRepository;
+	private readonly IGenericRepository<PodcastPersona> _podcastPersonaRepository;
 	// private readonly RssService _rssService;
 	private readonly OpenAIService _openAiService;
 	private readonly OpenAiClient _openAiClient;
@@ -26,6 +27,7 @@ public class PodcastGenerationService
 		// IGenericRepository<NewsSite> newsSiteRepository,
 		IGenericRepository<NewsSiteArticle> newsSiteArticleRepository,
 		IGenericRepository<Podcast> podcastRepository,
+		IGenericRepository<PodcastPersona> podcastPersonaRepository,
 		// RssService rssService,
 		OpenAIService openAiService,
 		OpenAiClient openAiClient,
@@ -36,6 +38,7 @@ public class PodcastGenerationService
 		// _newsSiteRepository = newsSiteRepository;
 		_newsSiteArticleRepository = newsSiteArticleRepository;
 		_podcastRepository = podcastRepository;
+		_podcastPersonaRepository = podcastPersonaRepository;
 		// _rssService = rssService;
 		_openAiService = openAiService;
 		_openAiClient = openAiClient;
@@ -116,10 +119,17 @@ public class PodcastGenerationService
 
 			newPodcast.PodcastId = newPodcastId;
 			newPodcast.PodcastSegments = new List<PodcastSegment>();
-			newPodcast.PodcastPersonas = new List<PodcastPersona>();
 			newPodcast.NewsSiteArticles = new List<NewsSiteArticle>();
 			newPodcast.Date = DateTime.Now;
 			newPodcast.Status = "generating";
+			
+			List<PodcastPersona> personas = await _podcastPersonaRepository.GetAllAsync();
+			
+			PodcastPersona? hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
+			PodcastPersona? guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
+			
+			newPodcast.PodcastGuestPersonaId = guestPersona.PodcastPersonaId;
+			newPodcast.PodcastHostPersonaId = hostPersona.PodcastPersonaId;
 			
 			await _podcastRepository.AddAsync(newPodcast);
 

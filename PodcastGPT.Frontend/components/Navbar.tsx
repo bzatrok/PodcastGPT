@@ -1,7 +1,7 @@
 import React from 'react';
 
 type NavbarProps = {
-  setShowModal: (showModal: boolean) => void,
+  setShowModal?: (showModal: boolean) => void,
 }
 
 const Navbar: React.FC<NavbarProps> = ({ setShowModal }) => {
@@ -18,14 +18,17 @@ const Navbar: React.FC<NavbarProps> = ({ setShowModal }) => {
           </div>
           <label className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
           <div className="ml-auto">
-            <button
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-              onClick={(e) => {
-                e.preventDefault();
-                setShowModal(true);
-              }}>
-              Create Podcast
-            </button>
+            {setShowModal && (
+              <button
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (setShowModal)
+                    setShowModal(true);
+                }}>
+                Create Podcast
+              </button>
+            )}
           </div>
         </div>
       </nav>

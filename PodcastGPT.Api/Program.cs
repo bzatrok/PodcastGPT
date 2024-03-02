@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PodcastGPT.Core.Clients;
@@ -280,9 +281,18 @@ public class Program
 		{
 			var services = scope.ServiceProvider;
 
-			var context = services.GetRequiredService<DatabaseContext>();   
+			var context = services.GetRequiredService<DatabaseContext>();
+
 			context.Database.EnsureCreated();
-			// context.Database.Migrate();
+			//
+			// try
+			// {
+			// 	context.Database.Migrate();
+			// }
+			// catch (Exception e)
+			// {
+			// 	Console.WriteLine(e);
+			// }
 		}
 		
 		app.Run();

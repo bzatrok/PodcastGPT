@@ -22,12 +22,14 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                 <div className="flex-1">delete</div>
             </div>
             {podcasts.map((podcast) => (
-                <div 
-                key={`${podcast.podcastId}_${podcast.status}`}
-                className="flex flex-row gap-2 p-2 border-b border-gray-200">
+                <div
+                    key={`${podcast.podcastId}_${podcast.status}`}
+                    className="flex flex-row gap-2 p-2 border-b border-gray-200">
                     <div className="flex-1">{podcast.title}</div>
                     <div className="flex-1">{podcast.topic}</div>
-                    <div className="flex-1">{podcast.slug}</div>
+                    <a href={`http://localhost:3000/${podcast.slug}`} className="flex-1 underline text-blue-600 hover:text-red-600">
+                        {podcast.slug}
+                    </a>
                     <div className="flex-1">{podcast.date.toString()}</div>
                     <div className="flex-1">{podcast.status}
                         {podcast.status !== "ready" && (
@@ -50,9 +52,12 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                     )
                     }
                     <div className="flex-1">
-                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {
-                            showDeleteModal(podcast.podcastId);
-                        }}>
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            disabled={podcast.status !== "ready"}
+                            onClick={() => {
+                                showDeleteModal(podcast.podcastId);
+                            }}>
                             Delete
                         </button>
                     </div>

@@ -70,6 +70,23 @@ public class PodcastController : ControllerBase
 		}
 	}
 	
+	[HttpGet]
+	[Route("podcasts/{podcastSlug}")]
+	public async Task<ActionResult<PodcastDetailResponse>> GetPodcastBySlug([FromRoute] string podcastSlug)
+	{
+		try
+		{
+			var allPodcasts = await _podcastRepository.GetAllAsync();
+			var podcast = allPodcasts.FirstOrDefault(podcast => podcast.Slug.ToLower().Trim() == podcastSlug.ToLower().Trim());
+			return new PodcastDetailResponse(podcast);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error converting text to speech");
+			throw;
+		}
+	}
+	
 	[HttpDelete]
 	[Route("podcasts/{podcastId}")]
 	public async Task<ActionResult> DeletePodcastById([FromRoute] Guid podcastId)

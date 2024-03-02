@@ -60,11 +60,16 @@ public class OpenAIService
 		var interviewerSystemMessage = $"{OpenAISystemMessages.InterviewerSystemMessage}{newsSection}";
 		var guestSystemMessage = OpenAISystemMessages.GuestSystemMessage;
 
-		List<PodcastPersona> personas = await _podcastPersonaRepository.GetAllAsync();
-			
-		PodcastPersona? hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
-		PodcastPersona? guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
-	
+		// List<PodcastPersona> personas = await _podcastPersonaRepository.GetAllAsync();
+		// 	
+		// PodcastPersona? hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
+		// PodcastPersona? guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
+
+		var hostPersona = podcast.PodcastHostPersona;
+		var guestPersona = podcast.PodcastGuestPersona;
+		
+		var personas = new List<PodcastPersona> { hostPersona, guestPersona };
+		
 		// SETTING UP PODCAST LOGIC
 		
 		// var existingPodcast = await _podcastRepository.GetByIdAsync(podcast.PodcastId);
@@ -75,6 +80,9 @@ public class OpenAIService
 		
 		// podcast.PodcastPersonas.Add(hostPersona);
 		// podcast.PodcastPersonas.Add(guestPersona);
+
+		// podcast.PodcastHostPersonaId = hostPersona.PodcastPersonaId;
+		// podcast.PodcastGuestPersonaId = guestPersona.PodcastPersonaId;
 
 		var firstSegment = new PodcastSegment
 		{

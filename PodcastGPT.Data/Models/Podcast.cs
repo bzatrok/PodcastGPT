@@ -11,6 +11,10 @@ public class Podcast
 	public DateTime Date { get; set; }
 	public string? FullAudioFileUrl { get; set; }
 	public virtual ICollection<PodcastSegment> PodcastSegments { get; set; } = new List<PodcastSegment>();
-	public virtual ICollection<PodcastPersona> PodcastPersonas { get; set; } = new List<PodcastPersona>();
 	public virtual ICollection<NewsSiteArticle> NewsSiteArticles { get; set; } = new List<NewsSiteArticle>();
+	
+	public Guid PodcastHostPersonaId { get; set; }
+	public virtual PodcastPersona PodcastHostPersona { get; set; }
+	public Guid PodcastGuestPersonaId { get; set; }
+	public virtual PodcastPersona PodcastGuestPersona { get; set; }
 }
