@@ -1,0 +1,67 @@
+﻿version: '3'
+
+services:
+  dotnet:
+    image: amberglass/podcastgpt.api
+    #platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+#      - postgres
+      - redis
+    volumes:
+      - ./database:/app/database
+      - ./generated:/app/generated
+    ports:
+      - "8080:8080"
+    networks:
+      - internal
+
+#  postgres:
+#    image: postgres:15
+#    command: postgres -c 'max_connections=1000'
+#    restart: always
+#    security_opt:
+#        - seccomp:unconfined
+#    environment:
+#        - POSTGRES_USER=postgres
+#        - POSTGRES_PASSWORD=password
+#        - POSTGRES_DB=postgres
+#    volumes: 
+#        - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning
+    environment:
+        - REDIS_AOF_ENABLED=yes
+        - ALLOW_EMPTY_PASSWORD=yes
+    volumes: 
+        - redis_data:/data
+
+  frontend:
+     image: amberglass/podcastgpt.dashboard
+     #platform: linux/amd64
+     build:
+       context: ./PodcastGPT.Frontend
+       dockerfile: ./Dockerfile
+     restart: always
+     depends_on:
+       - dotnet
+     ports:
+       - "3000:3000"
+     networks:
+       - internal
+networks:
+  internal:
+    driver: bridge
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
