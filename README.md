@@ -18,6 +18,6 @@ Create a copy of the .env.template file found in the project root and add a vali
 `cp .env.template .env`
 
 Run the following command:
-`docker compose --env-file .env up --build -d`
+`docker compose up --build -d`
 
 The application will be running under `http://localhost:8080`. 
