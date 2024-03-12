@@ -41,18 +41,18 @@ public class AudioService
 			outputPath,
 			audioFilePaths);
 		
-		foreach (var audioFilePath in audioFilePaths)
-		{
-			try
-			{
-				var file = new FileInfo(audioFilePath);
-				file.Delete();
-			}
-			catch (Exception e)
-			{
-				_logger.LogError(e, "Error deleting audio file");
-			}
-		}
+		// foreach (var audioFilePath in audioFilePaths)
+		// {
+		// 	try
+		// 	{
+		// 		var file = new FileInfo(audioFilePath);
+		// 		file.Delete();
+		// 	}
+		// 	catch (Exception e)
+		// 	{
+		// 		_logger.LogError(e, "Error deleting audio file");
+		// 	}
+		// }
 
 		return mergedFilePath;
 	}

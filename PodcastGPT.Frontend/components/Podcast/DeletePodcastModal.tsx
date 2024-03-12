@@ -1,5 +1,5 @@
 import React from 'react';
-import DefaultButton from './DefaultButton';
+import DefaultButton from '../Generic/DefaultButton';
 import { deletePodcastById } from '@/utils/podcastService';
 
 type DeletePodcastModalProps = {

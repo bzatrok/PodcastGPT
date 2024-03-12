@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-import Navbar from '@/components/Navbar'
+import Navbar from '@/components/Generic/Navbar'
 import { Podcast } from '@/models/dtos/Podcast'
-import PodcastsTable from '@/components/PodcastsTable'
-import CreatePodcastModal from '@/components/CreatePodcastModal'
-import DeletePodcastModal from '@/components/DeletePodcastModal'
+import PodcastsTable from '@/components/Podcast/PodcastsTable'
+import CreatePodcastModal from '@/components/Podcast/CreatePodcastModal'
+import DeletePodcastModal from '@/components/Podcast/DeletePodcastModal'
  
 const Home: React.FC = () => {
 

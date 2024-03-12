@@ -1,4 +1,4 @@
-import Footer from '@/components/Footer';
+import Footer from '@/components/Generic/Footer';
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 

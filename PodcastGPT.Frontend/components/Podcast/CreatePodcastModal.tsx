@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import LabeledInputField from './LabeledInputField';
+import LabeledInputField from '../Generic/LabeledInputField';
 import { PodcastCreationRequest } from '@/models/requests/PodcastCreationRequest';
-import DefaultButton from './DefaultButton';
+import DefaultButton from '../Generic/DefaultButton';
 import { createPodcast } from '@/utils/podcastService';
 import { PodcastDetailResponse } from '@/models/responses/PodcastDetailResponse';
 import { Podcast } from '@/models/dtos/Podcast';

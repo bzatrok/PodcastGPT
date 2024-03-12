@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { GetServerSideProps } from 'next';
 
-import Navbar from '@/components/Navbar'
+import Navbar from '@/components/Generic/Navbar'
 import { Podcast } from '@/models/dtos/Podcast'
-import PodcastSegmentsTable from '@/components/PodcastSegmentsTable';
+import PodcastSegmentsTable from '@/components/Podcast/PodcastSegmentsTable';
 
 interface PodcastDetailPageProps {
   podcastSlug: string;

@@ -42,7 +42,7 @@ public class OpenAIService
 	}
 	
 	#endregion
-	#region Requests
+	#region Create Podcast
 	
 	public async Task<Podcast> GeneratePodcastContentFromNews(
 		Guid podcastId,
@@ -207,6 +207,14 @@ public class OpenAIService
 
 	    return null;
     }
+
+    #endregion
+    #region Re-generate Audio for Podcast
+
+    // public async Task<Podcast> RegenerateAudioForPodcastId(Guid podcastId)
+    // {
+	   //
+    // }
 
     #endregion
 	#region TTS
