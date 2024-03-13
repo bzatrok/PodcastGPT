@@ -50,15 +50,14 @@ const Home: React.FC = () => {
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
       <div className="flex max-w-[980px] flex-col items-start gap-2">
         <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-          Podcast creationtoo <br className="hidden sm:inline" />
+          PodcastGPT is a podcast creation tool <br className="hidden sm:inline" />
           built with Radix UI and Tailwind CSS.
         </h1>
         <p className="max-w-[700px] text-lg text-muted-foreground">
-          Accessible and customizable components that you can copy and paste
-          into your apps. Free. Open Source. And Next.js 13 Ready.
+          Click Create podcast to generate a podcast from a title & topic of your choice!
         </p>
       </div>
-      <div className="flex gap-4">
+      <div className="flex gap-4">s
         <Button variant="outline"
           onClick={() => {
             showCreateModal();

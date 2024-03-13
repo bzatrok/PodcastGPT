@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Amberglass.Radio": {
+    "PodcastGPT": {
       "commandName": "Project",
       "dotnetRunMessages": true
     }
