@@ -5,6 +5,7 @@ import DefaultButton from '../Generic/DefaultButton';
 import { createPodcast } from '@/utils/podcastService';
 import { PodcastDetailResponse } from '@/models/responses/PodcastDetailResponse';
 import { Podcast } from '@/models/dtos/Podcast';
+import LoadingButton from '../Generic/LoadingButton';
 
 type CreatePodcastModalProps = {
     showModal: boolean;
@@ -13,6 +14,8 @@ type CreatePodcastModalProps = {
 }
 
 const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setShowModal, newPodcastCreated }) => {
+
+    const [isLoading, setIsLoading] = useState(false);
     const [podcastCreationRequest, setPodcastCreationRequest] = useState<PodcastCreationRequest>({} as PodcastCreationRequest);
 
     // OVERLAY
@@ -28,6 +31,7 @@ const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setS
     const handleCreationFinished = (e: Podcast) => {
         newPodcastCreated(e);
         setShowModal(false);
+        setIsLoading(false);
     }
 
     return (
@@ -50,25 +54,36 @@ const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setS
                                     PodcastTitle: e
                                 })} /> */}
                             <LabeledInputField
+                                type="text"
                                 label="Podcast Topic"
                                 placeHolder="Discovery of life on Mars..."
                                 onChange={(e) => setPodcastCreationRequest({
-                                    ...podcastCreationRequest, 
+                                    ...podcastCreationRequest,
                                     PodcastTopic: e
                                 })} />
                             <LabeledInputField
+                                type="url"
                                 label="Podcast News Article URL"
                                 placeHolder="https://article.com/topic1"
                                 onChange={(e) => setPodcastCreationRequest({
-                                    ...podcastCreationRequest, 
+                                    ...podcastCreationRequest,
                                     PodcastNewsArticleUrl: e
                                 })} />
-                            <DefaultButton
-                                title="Create Podcast"
-                                onClick={() => {
-                                    createPodcast(podcastCreationRequest, handleCreationFinished);
-                                }}
-                            />
+                            {isLoading ? (
+                                <LoadingButton />
+                            ) : (
+                                <DefaultButton
+                                    title="Create Podcast"
+                                    disabled={isLoading ||
+                                        podcastCreationRequest.PodcastTopic === undefined ||
+                                        podcastCreationRequest.PodcastNewsArticleUrl === undefined ||
+                                        podcastCreationRequest.PodcastNewsArticleUrl.length === 0 ||
+                                        podcastCreationRequest.PodcastTopic.length === 0}
+                                    onClick={() => {
+                                        setIsLoading(true);
+                                        createPodcast(podcastCreationRequest, handleCreationFinished);
+                                    }} />
+                            )}
                         </div>
                     </div>
                 </div>

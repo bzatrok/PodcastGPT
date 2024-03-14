@@ -15,19 +15,19 @@ const Home: React.FC = () => {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
 
   useEffect(() => {
-    const fetchPodcasts = async () => {
-
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-      const requestUrl = `${baseUrl}/api/podcasts`;
-
-      const response: any = await fetch(requestUrl);
-      const responseData = await response.json();
-
-      setPodcasts(responseData.podcasts);
-    };
-
     fetchPodcasts();
   }, []);
+
+  const fetchPodcasts = async () => {
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+    const requestUrl = `${baseUrl}/api/podcasts`;
+
+    const response: any = await fetch(requestUrl);
+    const responseData = await response.json();
+
+    setPodcasts(responseData.podcasts);
+  };
 
   const newPodcastCreated = (newPodcast: Podcast) => {
     setPodcasts([...podcasts, newPodcast]);
@@ -46,18 +46,22 @@ const Home: React.FC = () => {
     setShowModalType(null);
   }
 
+  const onDelete = () => {
+    fetchPodcasts();
+  };
+
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
       <div className="flex max-w-[980px] flex-col items-start gap-2">
         <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-          PodcastGPT is a podcast creation tool <br className="hidden sm:inline" />
-          built with Radix UI and Tailwind CSS.
+          PodcastGPT is a podcast creation tool
         </h1>
         <p className="max-w-[700px] text-lg text-muted-foreground">
+          Give it a topic and a link to a news article and it'll create a podcast between two hosts, who'll discuss it for you.
           Click Create podcast to generate a podcast from a title & topic of your choice!
         </p>
       </div>
-      <div className="flex gap-4">s
+      <div className="flex gap-4">
         <Button variant="outline"
           onClick={() => {
             showCreateModal();
@@ -78,7 +82,8 @@ const Home: React.FC = () => {
         <DeletePodcastModal
           showModal={showModalType === "delete"}
           setShowModal={setShowModal}
-          podcastToDeleteId={podcastToDeleteId as string} />
+          podcastToDeleteId={podcastToDeleteId as string} 
+          onDelete={onDelete} />
       </div>
     </section>
   )

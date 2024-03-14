@@ -23,10 +23,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="generated\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\PodcastGPT.Core\PodcastGPT.Core.csproj" />
       <ProjectReference Include="..\PodcastGPT.Data\PodcastGPT.Data.csproj" />
     </ItemGroup>

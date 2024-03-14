@@ -20,6 +20,8 @@ public class PodcastController : ControllerBase
 	
 	private readonly ILogger<PodcastController> _logger;
 	private readonly IGenericRepository<Podcast> _podcastRepository;
+	private readonly IGenericRepository<PodcastSegment> _podcastSegmentRepository;
+	private readonly IGenericRepository<NewsSiteArticle> _newsSiteArticleRepository;
 	private readonly PodcastGenerationService _podcastGenerationService;
 	
 	#endregion
@@ -28,11 +30,15 @@ public class PodcastController : ControllerBase
 	public PodcastController(
 		ILogger<PodcastController> logger,
 		IGenericRepository<Podcast> podcastRepository,
+		IGenericRepository<PodcastSegment> podcastSegmentRepository,
+		IGenericRepository<NewsSiteArticle> newsSiteArticleRepository,
 		PodcastGenerationService podcastGenerationService
 	)
 	{
 		_logger = logger;
 		_podcastRepository = podcastRepository;
+		_podcastSegmentRepository = podcastSegmentRepository;
+		_newsSiteArticleRepository = newsSiteArticleRepository;
 		_podcastGenerationService = podcastGenerationService;
 	}
 	
@@ -99,13 +105,59 @@ public class PodcastController : ControllerBase
 
 				foreach (var segment in podcast.PodcastSegments)
 				{
-					var segmentFile = new FileInfo(segment.AudioFileUrl);
-					segmentFile.Delete();
+					try
+					{
+						if (!string.IsNullOrWhiteSpace(segment.AudioFileUrl))
+						{
+							var segmentFile = new FileInfo(segment.AudioFileUrl);
+							segmentFile.Delete();
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning(ex, ex.Message);
+					}
+
+					try
+					{
+						_podcastSegmentRepository.DeleteAsync(segment.PodcastSegmentId);
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning(ex, ex.Message);
+					}
 				}
 
-				var fullFile = new FileInfo(podcast.FullAudioFileUrl);
-				fullFile.Delete();
-				
+				try
+				{
+					if (!string.IsNullOrWhiteSpace(podcast.FullAudioFileUrl))
+					{
+						var fullFile = new FileInfo(podcast.FullAudioFileUrl);
+						fullFile.Delete();
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, ex.Message);
+				}
+
+				foreach (var article in podcast.NewsSiteArticles)
+				{
+					try
+					{
+						await _newsSiteArticleRepository.DeleteAsync(article.NewsSiteArticleId);
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning(ex, ex.Message);
+					}
+				}
+
+				podcast.PodcastHostPersonaId = Guid.Empty;
+				podcast.PodcastGuestPersonaId = Guid.Empty;
+
+				_podcastRepository.SaveChangesAsync();
+
 				await _podcastRepository.DeleteAsync(podcastId);
 
 				return Ok("Podcast deleted successfully");

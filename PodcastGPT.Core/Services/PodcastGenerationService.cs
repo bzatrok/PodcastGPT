@@ -195,13 +195,13 @@ public class PodcastGenerationService
 		var interviewerSystemMessage = $"{OpenAISystemMessages.InterviewerSystemMessage}{newsSection}";
 		var guestSystemMessage = OpenAISystemMessages.GuestSystemMessage;
 
-		// List<PodcastPersona> personas = await _podcastPersonaRepository.GetAllAsync();
-		// 	
-		// PodcastPersona? hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
-		// PodcastPersona? guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
+		List<PodcastPersona> allPersonas = await _podcastPersonaRepository.GetAllAsync();
+		 	
+		PodcastPersona? hostPersona = allPersonas.FirstOrDefault(persona => persona.PodcastPersonaId == podcast.PodcastHostPersonaId);
+		PodcastPersona? guestPersona = allPersonas.FirstOrDefault(persona => persona.PodcastPersonaId == podcast.PodcastGuestPersonaId);
 
-		var hostPersona = podcast.PodcastHostPersona;
-		var guestPersona = podcast.PodcastGuestPersona;
+		// var hostPersona = podcast.PodcastHostPersona;
+		// var guestPersona = podcast.PodcastGuestPersona;
 		
 		var personas = new List<PodcastPersona> { hostPersona, guestPersona };
 		
@@ -293,7 +293,7 @@ public class PodcastGenerationService
 		
 		await _podcastRepository.SaveChangesAsync();
 
-		var mergedFilePath = await _audioService.MergeAudioFilesForPodcast(podcast);
+		var mergedFilePath = await _audioService.MergeAudioFilesForPodcast(podcast.PodcastId);
 		
 		podcast.FullAudioFileUrl = mergedFilePath;
 

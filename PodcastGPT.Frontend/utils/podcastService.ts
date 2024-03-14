@@ -14,7 +14,7 @@ export const createPodcast = async (creationRequest: PodcastCreationRequest, onC
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                podcastTitle: creationRequest.PodcastTitle,
+                // podcastTitle: creationRequest.PodcastTitle,
                 podcastTopic: creationRequest.PodcastTopic,
                 podcastNewsArticleUrl: creationRequest.PodcastNewsArticleUrl
             })

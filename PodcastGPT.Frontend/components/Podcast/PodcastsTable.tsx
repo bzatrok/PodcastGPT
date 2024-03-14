@@ -29,7 +29,7 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                     <TableHead>Podcast Title</TableHead>
                     <TableHead>Podcast Topic</TableHead>
                     <TableHead>Slug</TableHead>
-                    <TableHead>Created on Date</TableHead>
+                    <TableHead>Creation Date</TableHead>
                     <TableHead>Generation Status</TableHead>
                     <TableHead>Listen</TableHead>
                     <TableHead className='sr-only'>edit</TableHead>
@@ -43,7 +43,7 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                         <TableCell>{podcast.title}</TableCell>
                         <TableCell>{podcast.topic}</TableCell>
                         <TableCell>{podcast.slug}</TableCell>
-                        <TableCell>{podcast.date.toString()}</TableCell>
+                        <TableCell>{podcast.date}</TableCell>
                         <TableCell>{podcast.status}
                             {podcast.status !== "ready" && (
                                 <Spinner />
@@ -53,7 +53,7 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                         {podcast.status === "ready" ? (
                             <>
                                 <TableCell>
-                                    <audio controls src={`http://localhost:8080/api/stream/${podcast.podcastId}`} />
+                                    <audio controls src={`http://localhost:8080/api/file/podcast-audio/${podcast.podcastId}`} />
                                 </TableCell>
                                 <TableCell>
                                     <a href={`http://localhost:3000/${podcast.slug}`} >
@@ -72,7 +72,7 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
 
                         <TableCell>
                             <Button variant="outline"
-                                disabled={podcast.status !== "ready"}
+                                // disabled={podcast.status !== "ready"}
                                 onClick={() => {
                                     showDeleteModal(podcast.podcastId);
                                 }}>

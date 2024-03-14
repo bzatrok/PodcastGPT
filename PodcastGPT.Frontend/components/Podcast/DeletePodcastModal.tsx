@@ -6,9 +6,10 @@ type DeletePodcastModalProps = {
     showModal: boolean;
     setShowModal: (showModal: boolean) => void;
     podcastToDeleteId: string;
+    onDelete: () => void;
 }
 
-const DeletePodcastModal: React.FC<DeletePodcastModalProps> = ({ showModal, setShowModal, podcastToDeleteId }) => {
+const DeletePodcastModal: React.FC<DeletePodcastModalProps> = ({ showModal, setShowModal, podcastToDeleteId, onDelete }) => {
 
     const handleOverlayClick = () => {
         setShowModal(false);
@@ -20,6 +21,7 @@ const DeletePodcastModal: React.FC<DeletePodcastModalProps> = ({ showModal, setS
 
     const handleDeletionFinished = () => {
         setShowModal(false);
+        onDelete();
     }
 
     return (

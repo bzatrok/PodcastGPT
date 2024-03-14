@@ -1,9 +1,9 @@
 export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
-  name: "Next.js",
+  name: "PodcastGPT",
   description:
-    "Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.",
+    "PodcastGPT is a podcast creation tool. Give it a topic and a link to a news article and it'll create a podcast between two hosts, who'll discuss it for you.",
   mainNav: [
     {
       title: "Home",
@@ -11,8 +11,6 @@ export const siteConfig = {
     },
   ],
   links: {
-    twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn/ui",
-    docs: "https://ui.shadcn.com",
+    github: "https://github.com/bzatrok/PodcastGPT"
   },
 }

@@ -15,7 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
         </div>
       </div>
       <TailwindIndicator />
-      <Footer />
+      {/* <Footer /> */}
     </ThemeProvider>
   );
 }

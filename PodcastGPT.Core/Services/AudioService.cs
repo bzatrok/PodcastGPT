@@ -32,8 +32,9 @@ public class AudioService
 	#endregion
 	#region Requests
 	
-	public async Task<string> MergeAudioFilesForPodcast(Podcast podcast)
+	public async Task<string> MergeAudioFilesForPodcast(Guid podcastId)
 	{
+		var podcast = await _podcastRepository.GetByIdAsync(podcastId);
 		var outputPath = $"generated/podcasts/{podcast.Slug}.mp3";	
 		var audioFilePaths = podcast.PodcastSegments.Select(segment => segment.AudioFileUrl).ToList();
 		
