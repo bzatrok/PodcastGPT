@@ -37,7 +37,7 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {podcasts.map((podcast) => (
+                {podcasts && podcasts.map((podcast) => (
                     <TableRow
                         key={`${podcast.podcastId}_${podcast.status}`}>
                         <TableCell>{podcast.title}</TableCell>

@@ -3,6 +3,7 @@ using PodcastGPT.Core.Models;
 using PodcastGPT.Core.Repositories;
 using PodcastGPT.Data.Models;
 using Microsoft.Extensions.Logging;
+using PodcastGPT.Core.Constants;
 using PodcastGPT.Core.Extensions;
 using PodcastGPT.Core.Helpers;
 
@@ -15,10 +16,12 @@ public class PodcastGenerationService
 	private readonly IGenericRepository<NewsSiteArticle> _newsSiteArticleRepository;
 	private readonly IGenericRepository<Podcast> _podcastRepository;
 	private readonly IGenericRepository<PodcastPersona> _podcastPersonaRepository;
+	private readonly IGenericRepository<PodcastSegment> _podcastSegmentRepository;
 	// private readonly RssService _rssService;
 	private readonly OpenAIService _openAiService;
 	private readonly OpenAiClient _openAiClient;
 	private readonly ArticleService _articleService;
+	private readonly AudioService _audioService;
 	
 	private bool _isGeneratingPodcast = false;
 
@@ -28,10 +31,12 @@ public class PodcastGenerationService
 		IGenericRepository<NewsSiteArticle> newsSiteArticleRepository,
 		IGenericRepository<Podcast> podcastRepository,
 		IGenericRepository<PodcastPersona> podcastPersonaRepository,
+		IGenericRepository<PodcastSegment> podcastSegmentRepository,
 		// RssService rssService,
 		OpenAIService openAiService,
 		OpenAiClient openAiClient,
-		ArticleService articleService
+		ArticleService articleService,
+		AudioService audioService
 		)
 	{
 		_logger = logger;
@@ -39,10 +44,12 @@ public class PodcastGenerationService
 		_newsSiteArticleRepository = newsSiteArticleRepository;
 		_podcastRepository = podcastRepository;
 		_podcastPersonaRepository = podcastPersonaRepository;
+		_podcastSegmentRepository = podcastSegmentRepository;
 		// _rssService = rssService;
 		_openAiService = openAiService;
 		_openAiClient = openAiClient;
 		_articleService = articleService;
+		_audioService = audioService;
 	}
 
 	public async Task<Podcast> GeneratePodcast(PodcastGenerationRequest podcastGenerationRequest)
@@ -143,7 +150,7 @@ public class PodcastGenerationService
 
 			Task.Run(async () =>
 			{
-				await _openAiService.GeneratePodcastContentFromNews(
+				await GeneratePodcastContentFromNews(
 					newPodcastId,
 					// podcastTitle,
 					// podcastGenerationRequest.PodcastTopic,
@@ -170,5 +177,129 @@ public class PodcastGenerationService
 		}
 
 		return null;
+	}
+	
+	public async Task<Podcast> GeneratePodcastContentFromNews(
+		Guid podcastId,
+		// string? podcastTitle,
+		// string? podcastTopic,
+		List<NewsSiteArticle> articleList
+		)
+	{
+		var podcast = await _podcastRepository.GetByIdAsync(podcastId);
+		var showName = "NewsFlash";
+
+		var podcastArticles = string.Join(';', articleList.Select(article => $"Title: {article.Title}. Summary: {article.Summary}"));
+		var newsSection = articleList.Count > 0 ? $" We have a lot of news to cover today. Some of our highlights: {podcastArticles}" : "";
+		
+		var interviewerSystemMessage = $"{OpenAISystemMessages.InterviewerSystemMessage}{newsSection}";
+		var guestSystemMessage = OpenAISystemMessages.GuestSystemMessage;
+
+		// List<PodcastPersona> personas = await _podcastPersonaRepository.GetAllAsync();
+		// 	
+		// PodcastPersona? hostPersona = personas.FirstOrDefault(persona => persona.Type == "interviewer");
+		// PodcastPersona? guestPersona = personas.FirstOrDefault(persona => persona.Type == "guest");
+
+		var hostPersona = podcast.PodcastHostPersona;
+		var guestPersona = podcast.PodcastGuestPersona;
+		
+		var personas = new List<PodcastPersona> { hostPersona, guestPersona };
+		
+		// SETTING UP PODCAST LOGIC
+		
+		// var existingPodcast = await _podcastRepository.GetByIdAsync(podcast.PodcastId);
+		
+		// Re-create if exists
+		// if (existingPodcast != null)
+		// 	_podcastRepository.Delete(existingPodcast.PodcastId);
+		
+		// podcast.PodcastPersonas.Add(hostPersona);
+		// podcast.PodcastPersonas.Add(guestPersona);
+
+		// podcast.PodcastHostPersonaId = hostPersona.PodcastPersonaId;
+		// podcast.PodcastGuestPersonaId = guestPersona.PodcastPersonaId;
+
+		var firstSegment = new PodcastSegment
+		{
+			Order = 1,
+			OpenAiRole = "user",
+			TextContent =
+				$"Good morning folks! Welcome to the latest episode of our podcast, {showName}. I'm your host, {hostPersona.Name}. Today's topic is {podcast.Topic}. We have a special guest with us, {guestPersona.Name}. Welcome to the show!",
+			PodcastId = podcast.PodcastId,
+			PodcastPersonaId = hostPersona.PodcastPersonaId,
+			PodcastSegmentId = Guid.NewGuid()
+		};
+		
+		await _podcastSegmentRepository.AddAsync(firstSegment);
+
+		var previousSegment = firstSegment;
+		
+		var segments = new List<PodcastSegment>
+		{
+			firstSegment
+		};
+
+		while (!previousSegment.TextContent.Contains("__OVER__"))
+		{
+			var nextPersona = previousSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
+				? guestPersona
+				: hostPersona;
+			
+			var nextRole = previousSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
+				? "assistant"
+				: "user";
+			
+			var systemMessage = previousSegment.PodcastPersonaId == hostPersona.PodcastPersonaId
+				? guestSystemMessage
+				: interviewerSystemMessage;
+			
+			var nextSegment = await _openAiService.GenerateAssistantResponseForPodcastSegments(systemMessage, segments);
+
+			if (nextSegment == null)
+				throw new Exception("OpenAI response is null");
+			
+			// await _podcastRepository.SaveChangesAsync();
+
+			var newSegment = new PodcastSegment
+			{
+				Order = previousSegment.Order + 1,
+				OpenAiRole = nextRole,
+				TextContent = nextSegment,
+				PodcastId = podcast.PodcastId,
+				PodcastPersonaId = nextPersona.PodcastPersonaId,
+				PodcastSegmentId = Guid.NewGuid()
+			};
+			
+			await _podcastSegmentRepository.AddAsync(newSegment);
+
+			segments.Add(newSegment);
+			
+			previousSegment = newSegment;
+		}
+		
+		podcast.Status = "textready";
+
+		await _podcastRepository.SaveChangesAsync();
+
+		foreach (var segment in segments)
+		{
+			var persona = personas.FirstOrDefault(persona => persona.PodcastPersonaId == segment.PodcastPersonaId);
+			var generatedAudioForSegment = await _openAiService.ConvertSegmentToSpeech(segment, persona.VoiceId);
+			segment.AudioFileUrl = generatedAudioForSegment.AudioUrl;
+			await _podcastSegmentRepository.SaveChangesAsync();
+		}
+		
+		podcast.Status = "audiosegmentsready";
+		
+		await _podcastRepository.SaveChangesAsync();
+
+		var mergedFilePath = await _audioService.MergeAudioFilesForPodcast(podcast);
+		
+		podcast.FullAudioFileUrl = mergedFilePath;
+
+		podcast.Status = "ready";
+		await _podcastRepository.SaveChangesAsync();
+		
+		return podcast;
 	}
 }
