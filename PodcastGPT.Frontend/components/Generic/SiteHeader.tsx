@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site"
 import { buttonVariants } from "@/components/Base/Button"
 import { MainNav } from "@/components/Generic/MainMav"
 import { ThemeToggle } from "@/components/Generic/ThemeToggle"
+import { Icons } from "@/components/Icons"
 
 export function SiteHeader() {
   return (
@@ -23,6 +24,7 @@ export function SiteHeader() {
                   variant: "ghost",
                 })}
               >
+                 <Icons.gitHub className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>

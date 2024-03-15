@@ -1,4 +1,3 @@
-'use client'
 import { useEffect, useState } from 'react'
 
 import { Podcast } from '@/models/dtos/Podcast'
@@ -58,7 +57,7 @@ const Home: React.FC = () => {
         </h1>
         <p className="max-w-[700px] text-lg text-muted-foreground">
           Give it a topic and a link to a news article and it'll create a podcast between two hosts, who'll discuss it for you.
-          Click Create podcast to generate a podcast from a title & topic of your choice!
+          Click  Create New Episode to generate a podcast episode from a title & topic of your choice!
         </p>
       </div>
       <div className="flex gap-4">
@@ -66,8 +65,14 @@ const Home: React.FC = () => {
           onClick={() => {
             showCreateModal();
           }}>
-          Create Podcast
+           Create New Episode
         </Button>
+        {/* <Button variant="outline"
+          onClick={() => {
+            showCreateModal();
+          }}>
+           Create New Podcast
+        </Button> */}
       </div>
       <div className="flex gap-4">
         {/* <Navbar

@@ -1,4 +1,3 @@
-import Footer from '@/components/Generic/Footer';
 import { SiteHeader } from '@/components/Generic/SiteHeader';
 import { TailwindIndicator } from '@/components/Generic/TailwindIndicator';
 import { ThemeProvider } from '@/components/Generic/ThemeProvider';

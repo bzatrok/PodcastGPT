@@ -1,6 +1,6 @@
 import { Podcast } from '@/models/dtos/Podcast';
 import React from 'react';
-import Spinner from '../Generic/Spinner';
+import LabeledSpinner from '../Generic/LabeledSpinner';
 
 import {
     Table,
@@ -44,11 +44,16 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                         <TableCell>{podcast.topic}</TableCell>
                         <TableCell>{podcast.slug}</TableCell>
                         <TableCell>{podcast.date.toString()}</TableCell>
-                        <TableCell>{podcast.status}
-                            {podcast.status !== "ready" && (
-                                <Spinner />
-                            )
-                            }
+                        <TableCell>
+                            <div className='flex flex-col items-center'>
+                                {podcast.status !== "ready" ? (
+                                    <LabeledSpinner label={podcast.status} />
+                                ) : (
+                                <p>
+                                    {podcast.status}
+                                </p>)
+                                }
+                            </div>
                         </TableCell>
                         {podcast.status === "ready" ? (
                             <>
