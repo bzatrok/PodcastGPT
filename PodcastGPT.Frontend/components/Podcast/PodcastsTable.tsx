@@ -43,7 +43,7 @@ const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal
                         <TableCell>{podcast.title}</TableCell>
                         <TableCell>{podcast.topic}</TableCell>
                         <TableCell>{podcast.slug}</TableCell>
-                        <TableCell>{podcast.date}</TableCell>
+                        <TableCell>{podcast.date.toString()}</TableCell>
                         <TableCell>{podcast.status}
                             {podcast.status !== "ready" && (
                                 <Spinner />

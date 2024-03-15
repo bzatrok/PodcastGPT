@@ -39,6 +39,7 @@ const DeletePodcastModal: React.FC<DeletePodcastModalProps> = ({ showModal, setS
                             <p>Are you sure you want to delete this podcast?</p>
                             <DefaultButton
                                 title="Delete Podcast"
+                                disabled={false}
                                 onClick={async () => {
                                     deletePodcastById(podcastToDeleteId);
                                     handleDeletionFinished();

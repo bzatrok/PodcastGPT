@@ -2,7 +2,7 @@ import { Podcast } from "@/models/dtos/Podcast";
 import { PodcastCreationRequest } from "@/models/requests/PodcastCreationRequest";
 import { PodcastDetailResponse } from "@/models/responses/PodcastDetailResponse";
 
-export const createPodcast = async (creationRequest: PodcastCreationRequest, onCreationFinished: () => Podcast) => {
+export const createPodcast = async (creationRequest: PodcastCreationRequest, onCreationFinished: (e: Podcast) => void) => {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
     const requestUrl = `${baseUrl}/api/podcasts/generate`;
