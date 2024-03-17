@@ -92,28 +92,33 @@ public class PodcastGenerationService
 			// {
 			
 			// --
-			
-			if (!string.IsNullOrWhiteSpace(podcastGenerationRequest.PodcastNewsArticleUrl))
-				newsArticlesForPodcast = await _articleService.GetArticlesFromUrls(new List<string> {podcastGenerationRequest.PodcastNewsArticleUrl});
-			
-			foreach (var newArticle in newsArticlesForPodcast)
+
+			string podcastTitle = podcastGenerationRequest.PodcastTopic;
+
+			if (podcastGenerationRequest.ShouldGenerate)
 			{
-				var existingArticle = await _newsSiteArticleRepository.GetByIdAsync(newArticle.NewsSiteArticleId);
-				if (existingArticle == null)
-					await _newsSiteArticleRepository.AddAsync(newArticle);
+				if (!string.IsNullOrWhiteSpace(podcastGenerationRequest.PodcastNewsArticleUrl))
+					newsArticlesForPodcast = await _articleService.GetArticlesFromUrls(new List<string> { podcastGenerationRequest.PodcastNewsArticleUrl });
+
+				foreach (var newArticle in newsArticlesForPodcast)
+				{
+					var existingArticle = await _newsSiteArticleRepository.GetByIdAsync(newArticle.NewsSiteArticleId);
+					if (existingArticle == null)
+						await _newsSiteArticleRepository.AddAsync(newArticle);
+				}
+
+				newsArticlesForPodcast = newsArticlesForPodcast
+					.Where(article => article.PodcastId == null)
+					.Take(3)
+					.ToList();
+
+				var kickoffMessage = "Today's news stories are: " + string.Join("; ", newsArticlesForPodcast.Select(article => article.Title));
+				var summaryGenSystemPrompt =
+					"You are an expert summarizer of news! Please come up with a catchy, slightly clickbait-y title for a podcast based on these news stories! Keep it short, one sentence! Make sure it not too generic! Feature one of the stories in the list provided! " +
+					kickoffMessage;
+				podcastTitle = await _openAiClient.GenerateSingleAssistantResponse(summaryGenSystemPrompt, kickoffMessage);
 			}
-			
-			newsArticlesForPodcast = newsArticlesForPodcast
-				.Where(article => article.PodcastId == null)
-				.Take(3)
-				.ToList();
-			
-			var kickoffMessage = "Today's news stories are: " + string.Join("; ", newsArticlesForPodcast.Select(article => article.Title));
-			var summaryGenSystemPrompt =
-				"You are an expert summarizer of news! Please come up with a catchy, slightly clickbait-y title for a podcast based on these news stories! Keep it short, one sentence! Make sure it not too generic! Feature one of the stories in the list provided! " +
-				kickoffMessage;
-			var podcastTitle = await _openAiClient.GenerateSingleAssistantResponse(summaryGenSystemPrompt, kickoffMessage);
-			
+
 			var newPodcast = new Podcast()
 			{
 				Title = podcastTitle.Trim(),
@@ -148,15 +153,23 @@ public class PodcastGenerationService
 			
 			await _newsSiteArticleRepository.SaveChangesAsync();
 
-			Task.Run(async () =>
+			if (podcastGenerationRequest.ShouldGenerate)
 			{
-				await GeneratePodcastContentFromNews(
-					newPodcastId,
-					// podcastTitle,
-					// podcastGenerationRequest.PodcastTopic,
-					newsArticlesForPodcast
-				);
-			});
+				Task.Run(async () =>
+				{
+					await GeneratePodcastContentFromNews(
+						newPodcastId,
+						// podcastTitle,
+						// podcastGenerationRequest.PodcastTopic,
+						newsArticlesForPodcast
+					);
+				});
+			}
+			else
+			{
+				newPodcast.Status = "ready";
+				await _podcastRepository.SaveChangesAsync();
+			}
 
 			// OpenAI service -> generate conversation from news
 			// var newPodcast = await _openAiService.GeneratePodcastFromNews(

@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { isValidElement, useState } from 'react';
 import LabeledInputField from '../Generic/LabeledInputField';
 import { PodcastCreationRequest } from '@/models/requests/PodcastCreationRequest';
 import DefaultButton from '../Generic/DefaultButton';
 import { createPodcast } from '@/utils/podcastService';
-import { PodcastDetailResponse } from '@/models/responses/PodcastDetailResponse';
 import { Podcast } from '@/models/dtos/Podcast';
 import LoadingButton from '../Generic/LoadingButton';
+import LabeledCheckbox from '../Generic/LabeledCheckbox';
 
-type CreatePodcastModalProps = {
+type CreatePodcastEpisodeModalProps = {
     showModal: boolean;
     setShowModal: (showModal: boolean) => void;
     newPodcastCreated: (newPodcast: Podcast) => void;
 }
 
-const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setShowModal, newPodcastCreated }) => {
+const CreatePodcastEpisodeModal: React.FC<CreatePodcastEpisodeModalProps> = ({ showModal, setShowModal, newPodcastCreated }) => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [podcastCreationRequest, setPodcastCreationRequest] = useState<PodcastCreationRequest>({} as PodcastCreationRequest);
@@ -32,6 +32,22 @@ const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setS
         newPodcastCreated(e);
         setShowModal(false);
         setIsLoading(false);
+    }
+
+    const isCreationRequestInvalid = () => {
+
+        if (isLoading)
+            return true;
+
+        if (podcastCreationRequest.PodcastTopic === undefined || podcastCreationRequest.PodcastTopic.length === 0)
+            return true;
+
+        if (podcastCreationRequest.ShouldGenerate && 
+            (podcastCreationRequest.PodcastNewsArticleUrl === undefined ||
+            podcastCreationRequest.PodcastNewsArticleUrl.length === 0))
+            return true;
+
+        return false;
     }
 
     return (
@@ -69,16 +85,19 @@ const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setS
                                     ...podcastCreationRequest,
                                     PodcastNewsArticleUrl: e
                                 })} />
+                            <LabeledCheckbox
+                                label="Generate Podcast Content"
+                                subtitle="If checked, the podcast will be generated automatically using ChatGPt. If unchecked, you will be able to create the podcast content yourself."
+                                onChange={(e) => setPodcastCreationRequest({
+                                    ...podcastCreationRequest,
+                                    ShouldGenerate: e
+                                })} />
                             {isLoading ? (
                                 <LoadingButton />
                             ) : (
                                 <DefaultButton
                                     title="Create Podcast"
-                                    disabled={isLoading ||
-                                        podcastCreationRequest.PodcastTopic === undefined ||
-                                        podcastCreationRequest.PodcastNewsArticleUrl === undefined ||
-                                        podcastCreationRequest.PodcastNewsArticleUrl.length === 0 ||
-                                        podcastCreationRequest.PodcastTopic.length === 0}
+                                    disabled={isCreationRequestInvalid()}
                                     onClick={() => {
                                         setIsLoading(true);
                                         createPodcast(podcastCreationRequest, handleCreationFinished);
@@ -92,4 +111,4 @@ const CreatePodcastModal: React.FC<CreatePodcastModalProps> = ({ showModal, setS
     );
 }
 
-export default CreatePodcastModal;
+export default CreatePodcastEpisodeModal;

@@ -8,4 +8,5 @@ public class PodcastGenerationRequest
 	// public string? PodcastTitle { get; set; }
 	public string? PodcastTopic { get; set; }
 	public string? PodcastNewsArticleUrl { get; set; }
+	public bool ShouldGenerate { get; set; }
 }

@@ -43,6 +43,26 @@ public class PodcastController : ControllerBase
 	}
 	
 	#endregion
+	#region Create Podcast
+	
+	[HttpPost]
+	[Route("podcasts/generate")]
+	public async Task<ActionResult<PodcastDetailResponse>> GeneratePodcast([FromBody] PodcastGenerationRequest podcastGenerationRequest)
+	{
+		try
+		{
+			var newPodcast = await _podcastGenerationService.GeneratePodcast(podcastGenerationRequest);
+			return new PodcastDetailResponse(newPodcast);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error converting text to speech");
+			throw;
+		}
+	}
+
+	#endregion
+	#region Get Podcast(s)
 
 	[HttpGet]
 	[Route("podcasts")]
@@ -60,14 +80,14 @@ public class PodcastController : ControllerBase
 		}
 	}
 	
-	[HttpPost]
-	[Route("podcasts/generate")]
-	public async Task<ActionResult<PodcastDetailResponse>> GeneratePodcast([FromBody] PodcastGenerationRequest podcastGenerationRequest)
+	[HttpGet]
+	[Route("podcasts/{podcastId}")]
+	public async Task<ActionResult<PodcastDetailResponse>> GetPodcastById([FromRoute] string podcastId)
 	{
 		try
 		{
-			var newPodcast = await _podcastGenerationService.GeneratePodcast(podcastGenerationRequest);
-			return new PodcastDetailResponse(newPodcast);
+			var podcast = await _podcastRepository.GetByIdAsync(podcastId);
+			return new PodcastDetailResponse(podcast);
 		}
 		catch (Exception ex)
 		{
@@ -77,7 +97,7 @@ public class PodcastController : ControllerBase
 	}
 	
 	[HttpGet]
-	[Route("podcasts/{podcastSlug}")]
+	[Route("podcasts/slug/{podcastSlug}")]
 	public async Task<ActionResult<PodcastDetailResponse>> GetPodcastBySlug([FromRoute] string podcastSlug)
 	{
 		try
@@ -93,6 +113,31 @@ public class PodcastController : ControllerBase
 		}
 	}
 	
+	#endregion
+	#region Update Podcast
+	
+	[HttpPut]
+	[Route("podcasts/{podcastId}")]
+	public async Task<ActionResult<PodcastDetailResponse>> UpdatePodcastById([FromRoute] string podcastId, [FromBody] Podcast updatedPodcast)
+	{
+		try
+		{
+			var podcast = await _podcastRepository.GetByIdAsync(podcastId);
+			
+			Console.WriteLine("test");
+			
+			return new PodcastDetailResponse(podcast);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error converting text to speech");
+			throw;
+		}
+	}
+
+	#endregion
+	#region Delete Podcast
+
 	[HttpDelete]
 	[Route("podcasts/{podcastId}")]
 	public async Task<ActionResult> DeletePodcastById([FromRoute] Guid podcastId)
@@ -171,4 +216,6 @@ public class PodcastController : ControllerBase
 			throw;
 		}
 	}
+	
+	#endregion
 }

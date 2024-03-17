@@ -16,7 +16,8 @@ export const createPodcast = async (creationRequest: PodcastCreationRequest, onC
             body: JSON.stringify({
                 // podcastTitle: creationRequest.PodcastTitle,
                 podcastTopic: creationRequest.PodcastTopic,
-                podcastNewsArticleUrl: creationRequest.PodcastNewsArticleUrl
+                podcastNewsArticleUrl: creationRequest.PodcastNewsArticleUrl,
+                shouldGenerate: creationRequest.ShouldGenerate
             })
         });
     const jsonResponse : PodcastDetailResponse = await response.json();

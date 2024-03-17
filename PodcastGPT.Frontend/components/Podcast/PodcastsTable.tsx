@@ -17,77 +17,87 @@ import { Button } from "@/components/Base/Button"
 interface PodcastsTableProps {
     podcasts: Podcast[];
     showDeleteModal: (podcastId: string) => void;
+    isLoading: boolean;
 }
 
-const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal }) => {
+const PodcastsTable: React.FC<PodcastsTableProps> = ({ podcasts, showDeleteModal, isLoading }) => {
 
     return (
-        <Table className='border border-grey-200'>
-            <TableCaption>Your Podcasts</TableCaption>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Podcast Title</TableHead>
-                    <TableHead>Podcast Topic</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Creation Date</TableHead>
-                    <TableHead>Generation Status</TableHead>
-                    <TableHead>Listen</TableHead>
-                    <TableHead className='sr-only'>edit</TableHead>
-                    <TableHead className='sr-only'>delete</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {podcasts && podcasts.map((podcast) => (
-                    <TableRow
-                        key={`${podcast.podcastId}_${podcast.status}`}>
-                        <TableCell>{podcast.title}</TableCell>
-                        <TableCell>{podcast.topic}</TableCell>
-                        <TableCell>{podcast.slug}</TableCell>
-                        <TableCell>{podcast.date.toString()}</TableCell>
-                        <TableCell>
-                            <div className='flex flex-col items-center'>
-                                {podcast.status !== "ready" ? (
-                                    <LabeledSpinner label={podcast.status} />
+        <>
+            {podcasts && !isLoading ? (
+                <Table className='border border-grey-200'>
+                    <TableCaption>Your Podcasts</TableCaption>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Podcast Title</TableHead>
+                            <TableHead>Podcast Topic</TableHead>
+                            <TableHead>Slug</TableHead>
+                            <TableHead>Creation Date</TableHead>
+                            <TableHead>Generation Status</TableHead>
+                            <TableHead>Listen</TableHead>
+                            <TableHead className='sr-only'>edit</TableHead>
+                            <TableHead className='sr-only'>delete</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {podcasts.map((podcast) => (
+                            <TableRow
+                                key={`${podcast.slug}_${podcast.status}`}>
+                                <TableCell>{podcast.title}</TableCell>
+                                <TableCell>{podcast.topic}</TableCell>
+                                <TableCell>{podcast.slug}</TableCell>
+                                <TableCell>{podcast.date.toString()}</TableCell>
+                                <TableCell>
+                                    <div className='flex flex-col items-center'>
+                                        {podcast.status !== "ready" ? (
+                                            <LabeledSpinner label={podcast.status} />
+                                        ) : (
+                                            <p>
+                                                {podcast.status}
+                                            </p>)
+                                        }
+                                    </div>
+                                </TableCell>
+                                {podcast.status === "ready" ? (
+                                    <>
+                                        <TableCell>
+                                            <audio controls src={`http://localhost:8080/api/file/podcast-audio/${podcast.podcastId}`} />
+                                        </TableCell>
+                                        <TableCell>
+                                            <a href={`http://localhost:3000/podcasts/${podcast.slug}`} >
+                                                <Button variant="outline">Edit</Button>
+                                            </a>
+                                        </TableCell>
+                                    </>
                                 ) : (
-                                <p>
-                                    {podcast.status}
-                                </p>)
+                                    <>
+                                        <TableCell>-</TableCell>
+                                        <TableCell>-</TableCell>
+                                        <TableCell>-</TableCell>
+                                    </>
+                                )
                                 }
-                            </div>
-                        </TableCell>
-                        {podcast.status === "ready" ? (
-                            <>
-                                <TableCell>
-                                    <audio controls src={`http://localhost:8080/api/file/podcast-audio/${podcast.podcastId}`} />
-                                </TableCell>
-                                <TableCell>
-                                    <a href={`http://localhost:3000/${podcast.slug}`} >
-                                        <Button variant="outline">Edit</Button>
-                                    </a>
-                                </TableCell>
-                            </>
-                        ) : (
-                            <>
-                                <TableCell>-</TableCell>
-                                <TableCell>-</TableCell>
-                                <TableCell>-</TableCell>
-                            </>
-                        )
-                        }
 
-                        <TableCell>
-                            <Button variant="outline"
-                                // disabled={podcast.status !== "ready"}
-                                onClick={() => {
-                                    showDeleteModal(podcast.podcastId);
-                                }}>
-                                Delete
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                                <TableCell>
+                                    <Button variant="outline"
+                                        // disabled={podcast.status !== "ready"}
+                                        onClick={() => {
+                                            showDeleteModal(podcast.podcastId);
+                                        }}>
+                                        Delete
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        )
+                        )}
+                    </TableBody>
+                </Table>
+            ) : (
+                <div className='flex w-full border border-gray-100 rounded-md'>
+                    <LabeledSpinner label='Loading Podcast Episodes' />
+                </div>
+            )}
+        </>
     );
 
     // return (

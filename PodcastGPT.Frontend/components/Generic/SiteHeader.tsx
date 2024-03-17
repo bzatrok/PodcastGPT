@@ -1,3 +1,4 @@
+import { useContext, useEffect, useState } from "react"
 import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
@@ -7,6 +8,13 @@ import { ThemeToggle } from "@/components/Generic/ThemeToggle"
 import { Icons } from "@/components/Icons"
 
 export function SiteHeader() {
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
@@ -24,7 +32,9 @@ export function SiteHeader() {
                   variant: "ghost",
                 })}
               >
-                 <Icons.gitHub className="h-5 w-5" />
+                { isMounted && (
+                  <Icons.gitHub className="h-5 w-5" />
+                )}
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>

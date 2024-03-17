@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 
 import { Podcast } from '@/models/dtos/Podcast'
 import PodcastsTable from '@/components/Podcast/PodcastsTable'
-import CreatePodcastModal from '@/components/Podcast/CreatePodcastModal'
+import CreatePodcastEpisodeModal from '@/components/Podcast/CreatePodcastEpisodeModal'
 import DeletePodcastModal from '@/components/Podcast/DeletePodcastModal'
 import { Button } from '@/components/Base/Button'
 
 const Home: React.FC = () => {
 
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [showModalType, setShowModalType] = useState<string | null>(null);
   const [podcastToDeleteId, setPodcastToDeleteId] = useState<string | null>(null);
 
@@ -19,6 +20,8 @@ const Home: React.FC = () => {
 
   const fetchPodcasts = async () => {
 
+    setIsLoading(true);
+
     const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
     const requestUrl = `${baseUrl}/api/podcasts`;
 
@@ -26,6 +29,8 @@ const Home: React.FC = () => {
     const responseData = await response.json();
 
     setPodcasts(responseData.podcasts);
+
+    setIsLoading(false);
   };
 
   const newPodcastCreated = (newPodcast: Podcast) => {
@@ -79,8 +84,9 @@ const Home: React.FC = () => {
           setShowModal={showCreateModal} /> */}
         <PodcastsTable
           podcasts={podcasts}
-          showDeleteModal={showDeleteModal} />
-        <CreatePodcastModal
+          showDeleteModal={showDeleteModal}
+          isLoading={isLoading} />
+        <CreatePodcastEpisodeModal
           showModal={showModalType === "create"}
           setShowModal={setShowModal}
           newPodcastCreated={newPodcastCreated} />
